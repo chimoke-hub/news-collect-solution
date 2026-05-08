@@ -14,6 +14,6 @@ COPY . .
 
 RUN uv run python manage.py collectstatic --noinput
 
-EXPOSE 8000
+EXPOSE ${PORT:-8000}
 
-CMD ["uv", "run", "gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2"]
+CMD uv run gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2
