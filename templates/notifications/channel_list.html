@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}通知チャンネル — News Collect{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>通知チャンネル</h2>
+  <a href="{% url 'notifications:channel_create' %}" class="btn btn-primary">+ チャンネルを追加</a>
+</div>
+
+{% if not channels %}
+<div class="card text-center py-5">
+  <div class="card-body text-muted">
+    <p>通知チャンネルがありません。Slack または Teams の Webhook URL を登録してください。</p>
+    <a href="{% url 'notifications:channel_create' %}" class="btn btn-primary">チャンネルを追加</a>
+  </div>
+</div>
+{% else %}
+<div class="table-responsive">
+  <table class="table table-hover bg-white rounded shadow-sm">
+    <thead class="table-light">
+      <tr><th>名前</th><th>種別</th><th>状態</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for ch in channels %}
+      <tr>
+        <td>{{ ch.name }}</td>
+        <td>{{ ch.get_channel_type_display }}</td>
+        <td>{% if ch.is_active %}<span class="badge bg-success">有効</span>{% else %}<span class="badge bg-secondary">無効</span>{% endif %}</td>
+        <td class="text-end">
+          <form method="post" action="{% url 'notifications:channel_delete' ch.pk %}" class="d-inline"
+                onsubmit="return confirm('削除しますか？')">
+            {% csrf_token %}
+            <button class="btn btn-outline-danger btn-sm">削除</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

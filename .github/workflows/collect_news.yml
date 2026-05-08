@@ -1,0 +1,23 @@
+name: News Collect — Trigger All Themes
+
+on:
+  schedule:
+    # 毎日 00:00 UTC = 09:00 JST
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger collect_all_active_themes
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          COLLECT_SECRET: ${{ secrets.COLLECT_SECRET }}
+        run: |
+          curl -X POST "${APP_URL}/api/collect/trigger/" \
+            -H "Authorization: Bearer ${COLLECT_SECRET}" \
+            -H "Content-Type: application/json" \
+            --fail

@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+.venv/
+venv/
+db.sqlite3
+staticfiles/
+*.sqlite3
+data/news.db
+data/2026-*.md
+docs/2026-*.md

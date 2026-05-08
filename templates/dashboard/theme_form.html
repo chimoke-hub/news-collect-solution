@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}テーマ{{ action }} — News Collect{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h4 class="mb-0">テーマ{{ action }}</h4>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-bold">テーマ名</label>
+            <input type="text" name="name" class="form-control"
+                   value="{{ theme.name|default:'' }}" placeholder="例: AI・機械学習" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">キーワード</label>
+            <textarea name="keywords" class="form-control" rows="3"
+                      placeholder="例: AI OR 機械学習 OR ChatGPT OR LLM" required>{{ theme.keywords|default:'' }}</textarea>
+            <div class="form-text">スペース区切り、OR/ANDで組み合わせ可能</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">言語</label>
+            <select name="language" class="form-select">
+              <option value="both" {% if theme.language == "both" %}selected{% endif %}>両方（国内・海外）</option>
+              <option value="ja" {% if theme.language == "ja" %}selected{% endif %}>日本語のみ</option>
+              <option value="en" {% if theme.language == "en" %}selected{% endif %}>英語のみ</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-bold">収集頻度</label>
+            <select name="frequency" class="form-select">
+              <option value="daily" {% if theme.frequency == "daily" %}selected{% endif %}>毎日</option>
+              <option value="weekly" {% if theme.frequency == "weekly" %}selected{% endif %}>毎週</option>
+            </select>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">{{ action }}する</button>
+            <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">キャンセル</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

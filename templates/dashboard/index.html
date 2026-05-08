@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}ダッシュボード — News Collect{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>ダッシュボード</h2>
+  <a href="{% url 'dashboard:theme_create' %}" class="btn btn-primary">+ テーマを追加</a>
+</div>
+
+{% if not themes %}
+<div class="card text-center py-5">
+  <div class="card-body">
+    <h5 class="text-muted">まだテーマがありません</h5>
+    <p class="text-muted">テーマを作成して、ニュースの自動収集を始めましょう。</p>
+    <a href="{% url 'dashboard:theme_create' %}" class="btn btn-primary">テーマを作成する</a>
+  </div>
+</div>
+{% else %}
+<div class="row g-4">
+  {% for theme in themes %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">{{ theme.name }}</h5>
+        <p class="text-muted small">{{ theme.keywords|truncatechars:60 }}</p>
+        <div class="d-flex gap-2 mb-3">
+          <span class="badge bg-light text-dark">{{ theme.get_language_display }}</span>
+          <span class="badge bg-light text-dark">{{ theme.get_frequency_display }}</span>
+        </div>
+        <p class="small text-muted">
+          記事数: <strong>{{ theme.articles.count }}</strong><br>
+          最終収集: {{ theme.last_collected_at|date:"Y/m/d H:i"|default:"未収集" }}
+        </p>
+      </div>
+      <div class="card-footer d-flex gap-2">
+        <a href="{% url 'dashboard:theme_detail' theme.pk %}" class="btn btn-outline-primary btn-sm flex-grow-1">詳細</a>
+        <form method="post" action="{% url 'dashboard:collect_now' theme.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-success btn-sm">今すぐ収集</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

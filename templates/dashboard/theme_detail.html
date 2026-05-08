@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ theme.name }} — News Collect{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>{{ theme.name }}</h2>
+  <div class="d-flex gap-2">
+    {% if user.is_paid %}
+    <a href="{% url 'notifications:channel_link' theme.pk %}" class="btn btn-outline-warning btn-sm">通知設定</a>
+    {% endif %}
+    <a href="{% url 'dashboard:theme_edit' theme.pk %}" class="btn btn-outline-secondary btn-sm">編集</a>
+    <form method="post" action="{% url 'dashboard:collect_now' theme.pk %}">
+      {% csrf_token %}
+      <button class="btn btn-success btn-sm">今すぐ収集</button>
+    </form>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">キーワード</dt>
+      <dd class="col-sm-9 text-muted">{{ theme.keywords }}</dd>
+      <dt class="col-sm-3">言語</dt>
+      <dd class="col-sm-9">{{ theme.get_language_display }}</dd>
+      <dt class="col-sm-3">収集頻度</dt>
+      <dd class="col-sm-9">{{ theme.get_frequency_display }}</dd>
+      <dt class="col-sm-3">最終収集</dt>
+      <dd class="col-sm-9">{{ theme.last_collected_at|date:"Y/m/d H:i"|default:"未収集" }}</dd>
+    </dl>
+  </div>
+</div>
+
+<h4 class="mb-3">収集記事 <span class="badge bg-secondary">{{ articles|length }}件</span></h4>
+
+{% if not articles %}
+<p class="text-muted">まだ記事が収集されていません。「今すぐ収集」を押してください。</p>
+{% else %}
+{% regroup articles by category as category_groups %}
+{% for group in category_groups %}
+<h5 class="mt-4 mb-2">{% if group.grouper == "domestic" %}🇯🇵 国内{% else %}🌐 海外{% endif %}</h5>
+<ul class="list-group list-group-flush mb-3">
+  {% for article in group.list %}
+  <li class="list-group-item px-0 py-2">
+    <a href="{{ article.url }}" target="_blank" rel="noopener" class="text-decoration-none fw-medium">
+      {{ article.display_title }}
+    </a>
+    <div class="text-muted small mt-1">
+      {{ article.source }} &middot; {{ article.published_at|date:"Y/m/d H:i" }}
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endfor %}
+{% endif %}
+{% endblock %}
