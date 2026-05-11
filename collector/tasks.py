@@ -24,11 +24,9 @@ def collect_for_theme(self, theme_id: int):
     Theme.objects.filter(pk=theme_id).update(status=Theme.Status.COLLECTING)
 
     try:
-        # 初回は7日分、以降はlast_collected_atから（重複はDB制約で排除）
-        if theme.last_collected_at:
-            since = theme.last_collected_at - timedelta(hours=1)
-        else:
-            since = datetime.now(timezone.utc) - timedelta(days=7)
+        # 常に7日分を対象（NewsAPI無料プランは約1週間のインデックス遅延あり）
+        # DB制約(unique on theme+url)で重複は自動排除
+        since = datetime.now(timezone.utc) - timedelta(days=7)
 
         newsapi_articles = collect_newsapi(theme.keywords, since, theme.language)
         rss_articles = collect_rss_from_urls(theme.rss_feed_urls, theme.keywords, since)
