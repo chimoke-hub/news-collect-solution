@@ -58,6 +58,7 @@ class Article(models.Model):
     category = models.CharField(max_length=20, choices=Category.choices)
     published_at = models.DateTimeField()
     collected_at = models.DateTimeField(auto_now_add=True)
+    is_favorite = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-published_at"]

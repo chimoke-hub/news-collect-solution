@@ -1,7 +1,9 @@
+from itertools import groupby
+
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+from django.utils.timezone import localtime
 
 from collector.models import Article, Theme
 from collector.tasks import collect_for_theme
@@ -22,8 +24,19 @@ def theme_list(request):
 @login_required
 def theme_detail(request, pk):
     theme = get_object_or_404(Theme, pk=pk, user=request.user)
-    articles = theme.articles.all()[:100]
-    return render(request, "dashboard/theme_detail.html", {"theme": theme, "articles": articles})
+    articles_qs = theme.articles.order_by("-collected_at", "-published_at")[:200]
+
+    # 収集日でグループ化
+    grouped = {}
+    for article in articles_qs:
+        day = localtime(article.collected_at).date()
+        grouped.setdefault(day, []).append(article)
+
+    return render(request, "dashboard/theme_detail.html", {
+        "theme": theme,
+        "grouped_articles": sorted(grouped.items(), reverse=True),
+        "total": articles_qs.count(),
+    })
 
 
 @login_required
@@ -76,9 +89,51 @@ def theme_delete(request, pk):
 
 @login_required
 @require_POST
+def theme_reset(request, pk):
+    """テーマの収集記事をすべて削除してリセット。"""
+    theme = get_object_or_404(Theme, pk=pk, user=request.user)
+    count, _ = theme.articles.all().delete()
+    Theme.objects.filter(pk=pk).update(last_collected_at=None)
+    return redirect("dashboard:theme_detail", pk=theme.pk)
+
+
+@login_required
+@require_POST
 def collect_now(request, pk):
     theme = get_object_or_404(Theme, pk=pk, user=request.user)
-    # ステータスを即座に「収集中」に変更してダッシュボードにリダイレクト
     Theme.objects.filter(pk=pk).update(status=Theme.Status.COLLECTING)
     collect_for_theme.delay(theme.pk)
     return redirect("dashboard:index")
+
+
+@login_required
+@require_POST
+def article_delete(request, pk):
+    """記事を個別削除。"""
+    article = get_object_or_404(Article, pk=pk, theme__user=request.user)
+    theme_pk = article.theme_id
+    article.delete()
+    return redirect("dashboard:theme_detail", pk=theme_pk)
+
+
+@login_required
+@require_POST
+def article_favorite_toggle(request, pk):
+    """記事のお気に入りをトグル。"""
+    article = get_object_or_404(Article, pk=pk, theme__user=request.user)
+    article.is_favorite = not article.is_favorite
+    article.save(update_fields=["is_favorite"])
+    next_url = request.POST.get("next", "")
+    if next_url == "favorites":
+        return redirect("dashboard:favorites")
+    return redirect("dashboard:theme_detail", pk=article.theme_id)
+
+
+@login_required
+def favorites(request):
+    """お気に入り記事一覧。"""
+    articles = Article.objects.filter(
+        theme__user=request.user,
+        is_favorite=True,
+    ).select_related("theme").order_by("-published_at")
+    return render(request, "dashboard/favorites.html", {"articles": articles})
