@@ -20,42 +20,49 @@ def collect_for_theme(self, theme_id: int):
         logger.warning("Theme %d not found or inactive", theme_id)
         return
 
-    since = datetime.now(timezone.utc) - timedelta(days=1)
+    # 収集開始：ステータスを更新
+    Theme.objects.filter(pk=theme_id).update(status=Theme.Status.COLLECTING)
 
-    newsapi_articles = collect_newsapi(theme.keywords, since, theme.language)
-    rss_articles = collect_rss_by_keywords(theme.keywords, since, theme.language)
-    all_articles = newsapi_articles + rss_articles
+    try:
+        since = datetime.now(timezone.utc) - timedelta(days=1)
 
-    international = [a for a in all_articles if a.get("category") == "international"]
-    if international:
-        translate_titles(international)
+        newsapi_articles = collect_newsapi(theme.keywords, since, theme.language)
+        rss_articles = collect_rss_by_keywords(theme.keywords, since, theme.language)
+        all_articles = newsapi_articles + rss_articles
 
-    saved = 0
-    for data in all_articles:
-        _, created = Article.objects.get_or_create(
-            theme=theme,
-            url=data["url"],
-            defaults={
-                "title": data["title"],
-                "title_ja": data.get("title_ja", ""),
-                "source": data["source"],
-                "category": data["category"],
-                "published_at": data["published_at"],
-            },
+        international = [a for a in all_articles if a.get("category") == "international"]
+        if international:
+            translate_titles(international)
+
+        saved = 0
+        for data in all_articles:
+            _, created = Article.objects.get_or_create(
+                theme=theme,
+                url=data["url"],
+                defaults={
+                    "title": data["title"],
+                    "title_ja": data.get("title_ja", ""),
+                    "source": data["source"],
+                    "category": data["category"],
+                    "published_at": data["published_at"],
+                },
+            )
+            if created:
+                saved += 1
+
+        logger.info("Theme %d (%s): saved %d new articles", theme_id, theme.name, saved)
+
+        if theme.user.is_paid:
+            send_notifications_for_theme.delay(theme_id)
+
+        return saved
+
+    finally:
+        # 収集完了：ステータスをリセット（エラー時も必ず実行）
+        Theme.objects.filter(pk=theme_id).update(
+            status=Theme.Status.IDLE,
+            last_collected_at=django_tz.now(),
         )
-        if created:
-            saved += 1
-
-    theme.last_collected_at = django_tz.now()
-    theme.save(update_fields=["last_collected_at"])
-
-    logger.info("Theme %d (%s): saved %d new articles", theme_id, theme.name, saved)
-
-    # 有償プランのユーザーには通知送信
-    if theme.user.is_paid:
-        send_notifications_for_theme.delay(theme_id)
-
-    return saved
 
 
 @shared_task

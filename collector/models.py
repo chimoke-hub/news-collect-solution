@@ -14,11 +14,16 @@ class Theme(models.Model):
         DAILY = "daily", "毎日"
         WEEKLY = "weekly", "毎週"
 
+    class Status(models.TextChoices):
+        IDLE = "idle", "待機中"
+        COLLECTING = "collecting", "収集中"
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="themes")
     name = models.CharField(max_length=100)
     keywords = models.TextField(help_text="収集キーワード（スペース区切りまたはOR/AND）")
     language = models.CharField(max_length=10, choices=Language.choices, default=Language.BOTH)
     frequency = models.CharField(max_length=10, choices=Frequency.choices, default=Frequency.DAILY)
+    status = models.CharField(max_length=15, choices=Status.choices, default=Status.IDLE)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_collected_at = models.DateTimeField(null=True, blank=True)
