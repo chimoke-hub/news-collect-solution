@@ -120,7 +120,7 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Email (Resend HTTP API)
 RESEND_API_KEY = config("RESEND_API_KEY", default="")
-EMAIL_BACKEND = "resend.EmailBackend"
+EMAIL_BACKEND = "config.email_backend.ResendEmailBackend"
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="onboarding@resend.dev")
 
 # News collection API keys
