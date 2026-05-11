@@ -37,6 +37,7 @@ def theme_create(request):
         keywords = request.POST.get("keywords", "").strip()
         language = request.POST.get("language", "both")
         frequency = request.POST.get("frequency", "daily")
+        rss_feeds = request.POST.get("rss_feeds", "").strip()
         if name and keywords:
             Theme.objects.create(
                 user=request.user,
@@ -44,6 +45,7 @@ def theme_create(request):
                 keywords=keywords,
                 language=language,
                 frequency=frequency,
+                rss_feeds=rss_feeds,
             )
             return redirect("dashboard:index")
     return render(request, "dashboard/theme_form.html", {"action": "作成"})
@@ -57,6 +59,7 @@ def theme_edit(request, pk):
         theme.keywords = request.POST.get("keywords", theme.keywords).strip()
         theme.language = request.POST.get("language", theme.language)
         theme.frequency = request.POST.get("frequency", theme.frequency)
+        theme.rss_feeds = request.POST.get("rss_feeds", theme.rss_feeds).strip()
         theme.save()
         return redirect("dashboard:theme_detail", pk=theme.pk)
     return render(request, "dashboard/theme_form.html", {"theme": theme, "action": "編集"})

@@ -73,42 +73,43 @@ def collect_newsapi(keywords: str, since: datetime, language: str = "both") -> l
 
 # ---- RSS --------------------------------------------------------------------
 
-def collect_rss_by_keywords(keywords: str, since: datetime, language: str = "both") -> list[dict]:
-    """キーワードでRSSフィードをフィルタリングして収集する。"""
-    kw_list = [k.strip().lower() for k in re.split(r"\s+OR\s+|\s+AND\s+|\s+", keywords) if k.strip()]
+def collect_rss_from_urls(feed_urls: list[str], keywords: str, since: datetime) -> list[dict]:
+    """ユーザー指定のRSSフィードからキーワードでフィルタリングして収集する。"""
+    if not feed_urls:
+        return []
 
-    feeds = []
-    if language in ("ja", "both"):
-        feeds += _DEFAULT_JA_FEEDS
-    if language in ("en", "both"):
-        feeds += _DEFAULT_EN_FEEDS
-
+    # AND/OR を解析してフィルタリング条件を構築
+    must_terms, any_terms = _parse_keyword_logic(keywords)
     articles = []
-    for feed_info in feeds:
+
+    for url in feed_urls:
         try:
-            feed = feedparser.parse(feed_info["url"], agent="news-collect-solution/1.0")
+            feed = feedparser.parse(url, agent="news-collect-solution/1.0")
+            source_name = getattr(feed.feed, "title", url)
             if feed.bozo and not feed.entries:
+                logger.warning("RSS parse error for %s", url)
                 continue
             for entry in feed.entries:
                 published_at = _parse_entry_date(entry)
                 if published_at is None or published_at < since:
                     continue
-                url = getattr(entry, "link", "").strip()
+                article_url = getattr(entry, "link", "").strip()
                 title = getattr(entry, "title", "").strip()
-                if not url or not title:
+                if not article_url or not title:
                     continue
-                if not _matches_keywords(title, kw_list):
+                if not _matches_keyword_logic(title, must_terms, any_terms):
                     continue
                 articles.append({
                     "title": title,
-                    "url": url,
-                    "source": feed_info["name"],
-                    "category": feed_info["category"],
+                    "url": article_url,
+                    "source": source_name,
+                    "category": "domestic",
                     "published_at": published_at,
                 })
         except Exception as e:
-            logger.error("RSS fetch failed (%s): %s", feed_info["name"], e)
+            logger.error("RSS fetch failed (%s): %s", url, e)
 
+    logger.info("User RSS feeds: %d articles from %d feeds", len(articles), len(feed_urls))
     return articles
 
 
@@ -167,20 +168,32 @@ def _parse_entry_date(entry) -> datetime | None:
     return None
 
 
-def _matches_keywords(text: str, kw_list: list[str]) -> bool:
+def _parse_keyword_logic(keywords: str) -> tuple[list[str], list[str]]:
+    """
+    キーワード文字列を解析してAND条件とOR条件に分ける。
+    例: "Tottenham AND (Spurs OR Premier)" → must=["tottenham"], any=["spurs","premier"]
+    スペース区切りはOR扱い。
+    """
+    # AND で分割 → すべて含む必須語
+    must_terms = []
+    any_terms = []
+    parts = re.split(r'\s+AND\s+', keywords, flags=re.IGNORECASE)
+    for part in parts:
+        # OR で分割 → どれか含む語
+        or_parts = [p.strip().strip('()').lower() for p in re.split(r'\s+OR\s+|\s+', part) if p.strip()]
+        if len(or_parts) == 1:
+            must_terms.append(or_parts[0])
+        else:
+            any_terms.extend(or_parts)
+    return must_terms, any_terms
+
+
+def _matches_keyword_logic(text: str, must_terms: list[str], any_terms: list[str]) -> bool:
     text_lower = text.lower()
-    return any(kw in text_lower for kw in kw_list)
-
-
-_DEFAULT_JA_FEEDS = [
-    {"name": "CoinPost", "url": "https://coinpost.jp/?feed=rss2", "category": "domestic"},
-    {"name": "CoinDesk Japan", "url": "https://www.coindeskjapan.com/feed/", "category": "domestic"},
-    {"name": "あたらしい経済", "url": "https://www.neweconomy.jp/feed", "category": "domestic"},
-]
-
-_DEFAULT_EN_FEEDS = [
-    {"name": "CoinDesk", "url": "https://www.coindesk.com/arc/outboundfeeds/rss/", "category": "international"},
-    {"name": "Cointelegraph", "url": "https://cointelegraph.com/rss", "category": "international"},
-    {"name": "Decrypt", "url": "https://decrypt.co/feed", "category": "international"},
-    {"name": "The Block", "url": "https://www.theblock.co/rss.xml", "category": "international"},
-]
+    if must_terms and not all(t in text_lower for t in must_terms):
+        return False
+    if any_terms and not any(t in text_lower for t in any_terms):
+        return False
+    if not must_terms and not any_terms:
+        return True
+    return True

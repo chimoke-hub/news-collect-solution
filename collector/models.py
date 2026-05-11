@@ -24,9 +24,17 @@ class Theme(models.Model):
     language = models.CharField(max_length=10, choices=Language.choices, default=Language.BOTH)
     frequency = models.CharField(max_length=10, choices=Frequency.choices, default=Frequency.DAILY)
     status = models.CharField(max_length=15, choices=Status.choices, default=Status.IDLE)
+    rss_feeds = models.TextField(
+        blank=True, default="",
+        help_text="1行1URLでRSSフィードを追加（任意）",
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_collected_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def rss_feed_urls(self) -> list[str]:
+        return [u.strip() for u in self.rss_feeds.splitlines() if u.strip()]
 
     class Meta:
         ordering = ["-created_at"]

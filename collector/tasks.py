@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 @shared_task(bind=True, max_retries=3)
 def collect_for_theme(self, theme_id: int):
-    from collector.engine import collect_newsapi, collect_rss_by_keywords, translate_titles
+    from collector.engine import collect_newsapi, collect_rss_from_urls, translate_titles
     from collector.models import Article, Theme
 
     try:
@@ -31,7 +31,8 @@ def collect_for_theme(self, theme_id: int):
             since = datetime.now(timezone.utc) - timedelta(days=7)
 
         newsapi_articles = collect_newsapi(theme.keywords, since, theme.language)
-        all_articles = newsapi_articles
+        rss_articles = collect_rss_from_urls(theme.rss_feed_urls, theme.keywords, since)
+        all_articles = newsapi_articles + rss_articles
 
         international = [a for a in all_articles if a.get("category") == "international"]
         if international:
