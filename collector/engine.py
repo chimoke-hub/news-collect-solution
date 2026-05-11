@@ -30,10 +30,18 @@ def collect_newsapi(keywords: str, since: datetime, language: str = "both") -> l
     if language in ("en", "both"):
         langs.append(("en", "international"))
 
+    # 英語検索用に日本語・全角文字を除去したクエリを生成
+    import unicodedata
+    en_keywords = " ".join(
+        w for w in keywords.split()
+        if all(unicodedata.category(c) not in ("Lo", "Mn") or c.isascii() for c in w)
+    ) or keywords
+
     articles = []
     for lang, category in langs:
+        q = en_keywords if lang == "en" else keywords
         params = {
-            "q": keywords,
+            "q": q,
             "language": lang,
             "from": from_date,
             "sortBy": "publishedAt",
