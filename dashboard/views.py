@@ -75,5 +75,7 @@ def theme_delete(request, pk):
 @require_POST
 def collect_now(request, pk):
     theme = get_object_or_404(Theme, pk=pk, user=request.user)
+    # ステータスを即座に「収集中」に変更してダッシュボードにリダイレクト
+    Theme.objects.filter(pk=pk).update(status=Theme.Status.COLLECTING)
     collect_for_theme.delay(theme.pk)
-    return redirect("dashboard:theme_detail", pk=theme.pk)
+    return redirect("dashboard:index")
