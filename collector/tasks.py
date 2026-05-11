@@ -27,8 +27,7 @@ def collect_for_theme(self, theme_id: int):
         since = datetime.now(timezone.utc) - timedelta(days=1)
 
         newsapi_articles = collect_newsapi(theme.keywords, since, theme.language)
-        rss_articles = collect_rss_by_keywords(theme.keywords, since, theme.language)
-        all_articles = newsapi_articles + rss_articles
+        all_articles = newsapi_articles
 
         international = [a for a in all_articles if a.get("category") == "international"]
         if international:

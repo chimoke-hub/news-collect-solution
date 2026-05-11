@@ -47,6 +47,7 @@ def collect_newsapi(keywords: str, since: datetime, language: str = "both") -> l
             if data.get("status") != "ok":
                 logger.error("NewsAPI error: %s", data.get("message"))
                 continue
+            logger.info("NewsAPI lang=%s: %d articles returned", lang, len(data.get("articles", [])))
             for item in data.get("articles", []):
                 url = (item.get("url") or "").strip()
                 if not url or url == "https://removed.com":
