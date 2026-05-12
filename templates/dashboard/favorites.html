@@ -2,44 +2,51 @@
 {% block title %}お気に入り — News Collect{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">⭐ お気に入り記事</h2>
+<div class="page-container">
+  <h2 class="mb-xl">⭐ お気に入り記事</h2>
 
-{% if not articles %}
-<div class="card text-center py-5">
-  <div class="card-body text-muted">
-    <p>お気に入り記事がありません。</p>
-    <p class="small">記事一覧の ⭐ ボタンで追加できます。</p>
-    <a href="{% url 'dashboard:index' %}" class="btn btn-outline-primary">ダッシュボードへ</a>
+  {% if not articles %}
+  <div class="empty-state">
+    <h3>お気に入りがありません</h3>
+    <p>記事一覧の ⭐ ボタンでお気に入りに追加できます。</p>
+    <a href="{% url 'dashboard:index' %}" class="btn-wise btn-primary">ダッシュボードへ</a>
   </div>
+  {% else %}
+  <div class="card-wise" style="padding:0;overflow:hidden;">
+    <table class="table-wise">
+      <thead>
+        <tr>
+          <th>タイトル</th>
+          <th>テーマ</th>
+          <th>ソース</th>
+          <th>公開日</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for article in articles %}
+        <tr>
+          <td>
+            <a href="{{ article.url }}" target="_blank" rel="noopener"
+               style="font-weight:600;color:var(--ink);text-decoration:none;">
+              {{ article.display_title|truncatechars:70 }}
+            </a>
+          </td>
+          <td><span class="badge-wise badge-mute">{{ article.theme.name }}</span></td>
+          <td class="text-mute" style="font-size:13px;">{{ article.source }}</td>
+          <td class="text-mute" style="font-size:13px;">{{ article.published_at|date:"m/d H:i" }}</td>
+          <td>
+            <form method="post" action="{% url 'dashboard:article_favorite' article.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="favorites">
+              <button class="btn-icon active" title="お気に入り解除">⭐</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
 </div>
-{% else %}
-<div class="table-responsive">
-  <table class="table table-hover bg-white rounded shadow-sm">
-    <thead class="table-light">
-      <tr><th>タイトル</th><th>テーマ</th><th>ソース</th><th>公開日</th><th></th></tr>
-    </thead>
-    <tbody>
-      {% for article in articles %}
-      <tr>
-        <td>
-          <a href="{{ article.url }}" target="_blank" rel="noopener" class="text-decoration-none">
-            {{ article.display_title|truncatechars:70 }}
-          </a>
-        </td>
-        <td><span class="badge bg-light text-dark">{{ article.theme.name }}</span></td>
-        <td class="text-muted small">{{ article.source }}</td>
-        <td class="text-muted small">{{ article.published_at|date:"m/d H:i" }}</td>
-        <td>
-          <form method="post" action="{% url 'dashboard:article_favorite' article.pk %}">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="favorites">
-            <button class="btn btn-sm btn-warning" title="お気に入り解除">⭐</button>
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endif %}
 {% endblock %}

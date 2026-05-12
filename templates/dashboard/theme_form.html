@@ -2,53 +2,56 @@
 {% block title %}テーマ{{ action }} — News Collect{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-7">
-    <div class="card shadow-sm">
-      <div class="card-header">
-        <h4 class="mb-0">テーマ{{ action }}</h4>
-      </div>
-      <div class="card-body">
-        <form method="post">
-          {% csrf_token %}
-          <div class="mb-3">
-            <label class="form-label fw-bold">テーマ名</label>
-            <input type="text" name="name" class="form-control"
-                   value="{{ theme.name|default:'' }}" placeholder="例: AI・機械学習" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-bold">キーワード</label>
-            <textarea name="keywords" class="form-control" rows="3"
-                      placeholder="例: AI OR 機械学習 OR ChatGPT OR LLM" required>{{ theme.keywords|default:'' }}</textarea>
-            <div class="form-text">スペース区切り、OR/ANDで組み合わせ可能</div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-bold">言語</label>
-            <select name="language" class="form-select">
-              <option value="both" {% if theme.language == "both" %}selected{% endif %}>両方（国内・海外）</option>
-              <option value="ja" {% if theme.language == "ja" %}selected{% endif %}>日本語のみ</option>
-              <option value="en" {% if theme.language == "en" %}selected{% endif %}>英語のみ</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-bold">収集頻度</label>
-            <select name="frequency" class="form-select">
-              <option value="daily" {% if theme.frequency == "daily" %}selected{% endif %}>毎日</option>
-              <option value="weekly" {% if theme.frequency == "weekly" %}selected{% endif %}>毎週</option>
-            </select>
-          </div>
-          <div class="mb-4">
-            <label class="form-label fw-bold">RSSフィード URL <span class="text-muted fw-normal">(任意)</span></label>
-            <textarea name="rss_feeds" class="form-control" rows="4"
-                      placeholder="https://sports.yahoo.co.jp/rss/soccer.xml&#10;https://www.goal.com/jp/rss&#10;（1行1URL）">{{ theme.rss_feeds|default:'' }}</textarea>
-            <div class="form-text">スポナビ・Goal Japan など国内スポーツRSSを追加するとキーワードで絞り込んで収集します</div>
-          </div>
-          <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary">{{ action }}する</button>
-            <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">キャンセル</a>
-          </div>
-        </form>
-      </div>
+<div class="page-container">
+  <div style="max-width:600px; margin:0 auto;">
+    <h2 class="mb-xl">テーマ{{ action }}</h2>
+
+    <div class="card-wise">
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-lg">
+          <label class="label-wise">テーマ名</label>
+          <input type="text" name="name" class="input-wise"
+                 value="{{ theme.name|default:'' }}" placeholder="例: AI・機械学習" required>
+        </div>
+
+        <div class="mb-lg">
+          <label class="label-wise">キーワード</label>
+          <textarea name="keywords" class="input-wise" rows="3"
+                    placeholder="例: Tottenham AND (Spurs OR Hotspur)&#10;英語と日本語を混在させると0件になる場合があります" required>{{ theme.keywords|default:'' }}</textarea>
+          <p class="field-hint">AND / OR 演算子で絞り込み可能。英語キーワード推奨（NewsAPIは英語記事が多い）</p>
+        </div>
+
+        <div class="mb-lg">
+          <label class="label-wise">言語</label>
+          <select name="language" class="input-wise">
+            <option value="both" {% if theme.language == "both" %}selected{% endif %}>両方（国内・海外）</option>
+            <option value="ja"   {% if theme.language == "ja"   %}selected{% endif %}>日本語のみ</option>
+            <option value="en"   {% if theme.language == "en"   %}selected{% endif %}>英語のみ</option>
+          </select>
+        </div>
+
+        <div class="mb-lg">
+          <label class="label-wise">収集頻度</label>
+          <select name="frequency" class="input-wise">
+            <option value="daily"  {% if theme.frequency == "daily"  %}selected{% endif %}>毎日</option>
+            <option value="weekly" {% if theme.frequency == "weekly" %}selected{% endif %}>毎週</option>
+          </select>
+        </div>
+
+        <div class="mb-xl">
+          <label class="label-wise">RSSフィード URL <span class="text-mute fw-400" style="font-weight:400;">（任意）</span></label>
+          <textarea name="rss_feeds" class="input-wise" rows="4"
+                    placeholder="https://web.gekisaka.jp/feed/&#10;https://www.soccer-king.jp/feed&#10;（1行1URL）">{{ theme.rss_feeds|default:'' }}</textarea>
+          <p class="field-hint">国内スポーツニュースなど、キーワードに関連するRSSを追加するとより多くの記事を収集できます</p>
+        </div>
+
+        <div class="d-flex gap-sm">
+          <button type="submit" class="btn-wise btn-primary">{{ action }}する</button>
+          <a href="{% url 'dashboard:index' %}" class="btn-wise btn-secondary">キャンセル</a>
+        </div>
+      </form>
     </div>
   </div>
 </div>

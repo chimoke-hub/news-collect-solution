@@ -1,18 +1,22 @@
 {% extends "base.html" %}
-{% block title %}有償プランが必要です — News Collect{% endblock %}
+{% block title %}有償プランが必要 — News Collect{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
-  <div class="col-md-6 text-center">
-    <div class="card shadow-sm p-4">
-      <h3 class="mb-3">🔒 有償プランが必要です</h3>
-      {% if reason == "theme_limit" %}
-      <p class="text-muted">無料プランでは作成できるテーマは1件までです。<br>有償プランにアップグレードすると複数テーマを管理できます。</p>
-      {% elif reason == "notifications" %}
-      <p class="text-muted">Slack / Teams への通知機能は有償プランでご利用いただけます。</p>
-      {% endif %}
-      <a href="/dashboard/" class="btn btn-outline-secondary mt-3">ダッシュボードに戻る</a>
-    </div>
+<div class="page-container">
+  <div class="upgrade-card">
+    <div class="upgrade-icon">🔒</div>
+    <h3 class="font-display" style="font-size:28px;">有償プランが必要です</h3>
+    {% if reason == "theme_limit" %}
+    <p class="text-body" style="margin:var(--sp-md) 0 var(--sp-xl);">
+      無料プランでは作成できるテーマは1件までです。<br>
+      有償プランにアップグレードすると複数テーマを管理できます。
+    </p>
+    {% elif reason == "notifications" %}
+    <p class="text-body" style="margin:var(--sp-md) 0 var(--sp-xl);">
+      Slack / Teams への通知機能は有償プランでご利用いただけます。
+    </p>
+    {% endif %}
+    <a href="/dashboard/" class="btn-wise btn-secondary">ダッシュボードに戻る</a>
   </div>
 </div>
 {% endblock %}

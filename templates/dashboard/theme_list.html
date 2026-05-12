@@ -2,54 +2,62 @@
 {% block title %}テーマ管理 — News Collect{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2>テーマ管理</h2>
-  <a href="{% url 'dashboard:theme_create' %}" class="btn btn-primary">+ テーマを追加</a>
-</div>
+<div class="page-container">
+  <div class="page-header">
+    <h2>テーマ管理</h2>
+    <a href="{% url 'dashboard:theme_create' %}" class="btn-wise btn-primary">+ テーマを追加</a>
+  </div>
 
-{% if not themes %}
-<p class="text-muted">テーマがありません。</p>
-{% else %}
-<div class="table-responsive">
-  <table class="table table-hover bg-white rounded shadow-sm">
-    <thead class="table-light">
-      <tr>
-        <th>テーマ名</th>
-        <th>キーワード</th>
-        <th>言語</th>
-        <th>頻度</th>
-        <th>状態</th>
-        <th>最終収集</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for theme in themes %}
-      <tr>
-        <td><a href="{% url 'dashboard:theme_detail' theme.pk %}">{{ theme.name }}</a></td>
-        <td class="text-muted small">{{ theme.keywords|truncatechars:40 }}</td>
-        <td>{{ theme.get_language_display }}</td>
-        <td>{{ theme.get_frequency_display }}</td>
-        <td>
-          {% if theme.is_active %}
-          <span class="badge bg-success">有効</span>
-          {% else %}
-          <span class="badge bg-secondary">無効</span>
-          {% endif %}
-        </td>
-        <td class="small text-muted">{{ theme.last_collected_at|date:"Y/m/d H:i"|default:"—" }}</td>
-        <td class="text-end">
-          <a href="{% url 'dashboard:theme_edit' theme.pk %}" class="btn btn-outline-secondary btn-sm">編集</a>
-          <form method="post" action="{% url 'dashboard:theme_delete' theme.pk %}" class="d-inline"
-                onsubmit="return confirm('このテーマを無効にしますか？')">
-            {% csrf_token %}
-            <button class="btn btn-outline-danger btn-sm">削除</button>
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  {% if not themes %}
+  <div class="empty-state">
+    <h3>テーマがありません</h3>
+    <p>テーマを作成してニュース収集を始めましょう。</p>
+    <a href="{% url 'dashboard:theme_create' %}" class="btn-wise btn-primary">テーマを作成する</a>
+  </div>
+  {% else %}
+  <div class="card-wise" style="padding:0; overflow:hidden;">
+    <table class="table-wise">
+      <thead>
+        <tr>
+          <th>テーマ名</th>
+          <th>キーワード</th>
+          <th>言語</th>
+          <th>頻度</th>
+          <th>状態</th>
+          <th>最終収集</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for theme in themes %}
+        <tr>
+          <td><a href="{% url 'dashboard:theme_detail' theme.pk %}" style="font-weight:600;color:var(--ink);text-decoration:none;">{{ theme.name }}</a></td>
+          <td class="text-mute" style="font-size:13px;">{{ theme.keywords|truncatechars:40 }}</td>
+          <td>{{ theme.get_language_display }}</td>
+          <td>{{ theme.get_frequency_display }}</td>
+          <td>
+            {% if theme.is_active %}
+            <span class="badge-wise badge-green">有効</span>
+            {% else %}
+            <span class="badge-wise badge-mute">無効</span>
+            {% endif %}
+          </td>
+          <td class="text-mute" style="font-size:13px;">{{ theme.last_collected_at|date:"m/d H:i"|default:"—" }}</td>
+          <td>
+            <div class="d-flex gap-sm">
+              <a href="{% url 'dashboard:theme_edit' theme.pk %}" class="btn-wise btn-secondary btn-sm">編集</a>
+              <form method="post" action="{% url 'dashboard:theme_delete' theme.pk %}"
+                    onsubmit="return confirm('このテーマを無効にしますか？')" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn-wise btn-danger btn-sm">削除</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
 </div>
-{% endif %}
 {% endblock %}
