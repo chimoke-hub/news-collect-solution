@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import RedirectView
+
+from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -8,5 +9,5 @@ urlpatterns = [
     path("dashboard/", include("dashboard.urls")),
     path("notifications/", include("notifications.urls")),
     path("api/collect/", include("collector.urls")),
-    path("", RedirectView.as_view(url="/dashboard/", permanent=False)),
+    path("", views.landing, name="landing"),
 ]

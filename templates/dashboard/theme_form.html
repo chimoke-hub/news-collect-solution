@@ -3,8 +3,34 @@
 
 {% block content %}
 <div class="page-container">
-  <div style="max-width:600px; margin:0 auto;">
+  <div style="max-width:640px; margin:0 auto;">
+    {% if welcome %}
+    <div class="welcome-banner mb-xl">
+      <span class="welcome-emoji">🎉</span>
+      <div>
+        <strong>ようこそ！最初の収集ツールを作りましょう。</strong>
+        <p>下のテンプレートをクリックするか、好きなキーワードを入力するだけ。</p>
+      </div>
+    </div>
+    {% endif %}
+
     <h2 class="mb-xl">テーマ{{ action }}</h2>
+
+    {% if presets %}
+    <div class="mb-xl">
+      <p class="label-wise mb-sm">テンプレートから選ぶ <span class="text-mute" style="font-weight:400;">（クリックで自動入力）</span></p>
+      <div class="preset-chips">
+        {% for p in presets %}
+        <button type="button" class="preset-chip" data-name="{{ p.name }}"
+                data-keywords="{{ p.keywords }}" data-language="{{ p.language }}"
+                data-rss="{{ p.rss_feeds }}">
+          <span class="preset-chip-emoji">{{ p.emoji }}</span>
+          <span class="preset-chip-name">{{ p.name }}</span>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
 
     <div class="card-wise">
       <form method="post">
@@ -55,4 +81,19 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.querySelectorAll('.preset-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var form = document.querySelector('.card-wise form');
+      form.querySelector('[name="name"]').value = chip.dataset.name;
+      form.querySelector('[name="keywords"]').value = chip.dataset.keywords;
+      form.querySelector('[name="language"]').value = chip.dataset.language;
+      form.querySelector('[name="rss_feeds"]').value = chip.dataset.rss;
+      document.querySelectorAll('.preset-chip').forEach(function (c) { c.classList.remove('active'); });
+      chip.classList.add('active');
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
 {% endblock %}

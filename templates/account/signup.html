@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}無料登録 — News Collect{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h2 class="auth-title">無料ではじめる</h2>
+    <p class="auth-sub">メールアドレスだけで、最短30秒。すぐに収集ツールを作れます。</p>
+
+    {% if form.non_field_errors %}
+    <div class="alert-wise alert-error">
+      {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'account_signup' %}">
+      {% csrf_token %}
+
+      <div class="mb-lg">
+        <label class="label-wise">メールアドレス</label>
+        <input type="email" name="email" class="input-wise" autocomplete="email"
+               value="{{ form.email.value|default:'' }}" placeholder="you@example.com" required autofocus>
+        {% if form.email.errors %}<p class="field-err">{{ form.email.errors|join:" / " }}</p>{% endif %}
+      </div>
+
+      <div class="mb-lg">
+        <label class="label-wise">パスワード</label>
+        <input type="password" name="password1" class="input-wise" autocomplete="new-password"
+               placeholder="8文字以上" required>
+        {% if form.password1.errors %}<p class="field-err">{{ form.password1.errors|join:" / " }}</p>{% endif %}
+      </div>
+
+      <div class="mb-lg">
+        <label class="label-wise">パスワード（確認）</label>
+        <input type="password" name="password2" class="input-wise" autocomplete="new-password"
+               placeholder="もう一度入力" required>
+        {% if form.password2.errors %}<p class="field-err">{{ form.password2.errors|join:" / " }}</p>{% endif %}
+      </div>
+
+      {{ redirect_field }}
+      <button type="submit" class="btn-wise btn-primary" style="width:100%;">無料で登録する</button>
+    </form>
+
+    <p class="auth-switch">すでにアカウントをお持ちの方は <a href="{% url 'account_login' %}">ログイン</a></p>
+  </div>
+</div>
+{% endblock %}

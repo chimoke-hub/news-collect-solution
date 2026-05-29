@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}News Collect — あなたのキーワードで作る、自分だけのニュース収集ツール{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ─────────────────────────────────────────────── -->
+<section class="lp-hero">
+  <div class="lp-hero-inner">
+    <span class="lp-eyebrow">NEWS COLLECTOR · ノーコード</span>
+    <h1 class="lp-title">
+      気になる<span class="lp-hl">キーワード</span>を入れるだけ。<br>
+      あなただけのニュース収集ツールが完成。
+    </h1>
+    <p class="lp-sub">
+      Web3、AI、スポーツ——テーマを選んでキーワードを入れるだけで、
+      国内・海外のニュースを毎日自動で集めてお届け。エンジニア不要、最短30秒で始められます。
+    </p>
+    <div class="lp-cta">
+      <a href="/accounts/signup/" class="btn-wise btn-primary">無料で作ってみる →</a>
+      <a href="#how" class="btn-wise btn-tertiary">使い方を見る</a>
+    </div>
+    <p class="lp-cta-note">クレジットカード不要 · メールアドレスだけで登録</p>
+  </div>
+
+  <!-- preview card -->
+  <div class="lp-preview">
+    <div class="lp-preview-head">
+      <span class="lp-dot lp-dot-r"></span>
+      <span class="lp-dot lp-dot-y"></span>
+      <span class="lp-dot lp-dot-g"></span>
+      <span class="lp-preview-url">news-collect.app/dashboard</span>
+    </div>
+    <div class="lp-preview-body">
+      <div class="lp-pv-card">
+        <div class="lp-pv-card-top">
+          <strong>Web3・暗号資産</strong>
+          <span class="badge-wise badge-collecting"><span class="spinner"></span> 収集中</span>
+        </div>
+        <p class="lp-pv-kw">Web3 OR blockchain OR Bitcoin OR Ethereum</p>
+        <div class="lp-pv-rows">
+          <div class="lp-pv-row"><span>🌐</span> Ethereum、次期アップグレードの詳細を公開 <em>CoinDesk</em></div>
+          <div class="lp-pv-row"><span>🇯🇵</span> 国内取引所、新たなステーキング対応を発表 <em>日経</em></div>
+          <div class="lp-pv-row"><span>🌐</span> Bitcoin ETF inflows hit record high <em>Cointelegraph</em></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ─────────────────────────────────────── -->
+<section id="how" class="lp-section">
+  <div class="lp-section-inner">
+    <h2 class="lp-h2">3ステップで、あなたのニュース収集が動き出す</h2>
+    <div class="grid-3 lp-steps">
+      <div class="lp-step">
+        <span class="lp-step-num">1</span>
+        <h3>テーマを選ぶ</h3>
+        <p>用意されたプリセットから選ぶか、好きなキーワードを入力。AND / OR で細かく絞り込めます。</p>
+      </div>
+      <div class="lp-step">
+        <span class="lp-step-num">2</span>
+        <h3>自動で収集</h3>
+        <p>国内・海外のニュースと、お好みのRSSフィードから毎日記事を自動収集。海外記事は日本語に翻訳。</p>
+      </div>
+      <div class="lp-step">
+        <span class="lp-step-num">3</span>
+        <h3>受け取る</h3>
+        <p>ダッシュボードで一覧。お気に入り保存や、Slack / Teams への自動通知にも対応します。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Presets ──────────────────────────────────────────── -->
+<section class="lp-section lp-section-soft">
+  <div class="lp-section-inner">
+    <h2 class="lp-h2">人気テーマはワンクリックで</h2>
+    <p class="lp-section-sub">テンプレートを選べば、キーワードもおすすめRSSも自動で設定されます。</p>
+    <div class="grid-3 lp-presets">
+      {% for p in presets %}
+      <a href="/accounts/signup/" class="lp-preset">
+        <span class="lp-preset-emoji">{{ p.emoji }}</span>
+        <strong>{{ p.name }}</strong>
+        <span class="lp-preset-tag">{{ p.tagline }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ─────────────────────────────────────────── -->
+<section class="lp-section">
+  <div class="lp-section-inner">
+    <h2 class="lp-h2">小さくても、ちゃんと使える機能</h2>
+    <div class="grid-3 lp-features">
+      <div class="lp-feature"><span>🌏</span><h4>国内・海外をまとめて</h4><p>日本語・英語の記事を横断収集。海外記事のタイトルは自動で日本語化。</p></div>
+      <div class="lp-feature"><span>🔎</span><h4>AND / OR 検索</h4><p>「A AND (B OR C)」のような柔軟な条件でノイズを減らせます。</p></div>
+      <div class="lp-feature"><span>📡</span><h4>RSSフィード対応</h4><p>好きなメディアのRSSを追加して、収集ソースを自由に拡張。</p></div>
+      <div class="lp-feature"><span>⭐</span><h4>お気に入り保存</h4><p>後で読みたい記事をワンタップでブックマーク。</p></div>
+      <div class="lp-feature"><span>🔔</span><h4>Slack / Teams 通知</h4><p>収集結果をチームのチャンネルへ自動配信（有償プラン）。</p></div>
+      <div class="lp-feature"><span>⏰</span><h4>毎日 / 毎週の自動実行</h4><p>頻度を選ぶだけ。あとは放っておくだけで記事がたまります。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Final CTA ────────────────────────────────────────── -->
+<section class="lp-final">
+  <div class="lp-final-inner">
+    <h2>あなたの関心ごとを、毎日自動で集めよう。</h2>
+    <p>登録は無料。まずはひとつ、収集ツールを作ってみてください。</p>
+    <a href="/accounts/signup/" class="btn-wise btn-primary">無料ではじめる →</a>
+  </div>
+</section>
+
+<footer class="lp-footer">
+  <span class="wise-nav-brand"><span class="dot"></span>News Collect</span>
+  <span class="caption">© 2026 News Collect · あなたのためのニュース収集ソリューション</span>
+</footer>
+
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}ログイン — News Collect{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h2 class="auth-title">おかえりなさい</h2>
+    <p class="auth-sub">アカウントにログインして収集ツールを管理しましょう。</p>
+
+    {% if form.non_field_errors %}
+    <div class="alert-wise alert-error">
+      {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'account_login' %}">
+      {% csrf_token %}
+
+      <div class="mb-lg">
+        <label class="label-wise">メールアドレス</label>
+        <input type="email" name="login" class="input-wise" autocomplete="email"
+               value="{{ form.login.value|default:'' }}" placeholder="you@example.com" required autofocus>
+        {% if form.login.errors %}<p class="field-err">{{ form.login.errors|join:" / " }}</p>{% endif %}
+      </div>
+
+      <div class="mb-lg">
+        <label class="label-wise">パスワード</label>
+        <input type="password" name="password" class="input-wise" autocomplete="current-password"
+               placeholder="パスワード" required>
+        {% if form.password.errors %}<p class="field-err">{{ form.password.errors|join:" / " }}</p>{% endif %}
+      </div>
+
+      {{ redirect_field }}
+      <button type="submit" class="btn-wise btn-primary" style="width:100%;">ログイン</button>
+    </form>
+
+    <p class="auth-switch">アカウントをお持ちでない方は <a href="{% url 'account_signup' %}">新規登録</a></p>
+  </div>
+</div>
+{% endblock %}

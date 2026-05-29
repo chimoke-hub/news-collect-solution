@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from django.utils.timezone import localtime
 
 from collector.models import Article, Theme
+from collector.presets import PRESETS
 from collector.tasks import collect_for_theme
 
 
@@ -61,7 +62,11 @@ def theme_create(request):
                 rss_feeds=rss_feeds,
             )
             return redirect("dashboard:index")
-    return render(request, "dashboard/theme_form.html", {"action": "作成"})
+    return render(request, "dashboard/theme_form.html", {
+        "action": "作成",
+        "presets": PRESETS,
+        "welcome": request.GET.get("welcome") == "1",
+    })
 
 
 @login_required
@@ -75,7 +80,11 @@ def theme_edit(request, pk):
         theme.rss_feeds = request.POST.get("rss_feeds", theme.rss_feeds).strip()
         theme.save()
         return redirect("dashboard:theme_detail", pk=theme.pk)
-    return render(request, "dashboard/theme_form.html", {"theme": theme, "action": "編集"})
+    return render(request, "dashboard/theme_form.html", {
+        "theme": theme,
+        "action": "編集",
+        "presets": PRESETS,
+    })
 
 
 @login_required
