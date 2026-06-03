@@ -1,0 +1,63 @@
+name: Claude Code
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'Claudeへの指示（日本語OK）'
+        required: true
+        type: string
+      branch:
+        description: '作業ブランチ名（空白で自動生成）'
+        required: false
+        type: string
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Set up branch
+        id: branch
+        run: |
+          BRANCH="${{ github.event.inputs.branch }}"
+          if [ -z "$BRANCH" ]; then
+            BRANCH="claude/$(date +%Y%m%d-%H%M%S)"
+          fi
+          echo "name=$BRANCH" >> $GITHUB_OUTPUT
+          git checkout -b "$BRANCH"
+
+      - name: Run Claude Code
+        run: claude --print "${{ github.event.inputs.prompt }}"
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Commit and create PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.email "claude-bot@users.noreply.github.com"
+          git config user.name "Claude Bot"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "変更なし。PRは作成しません。"
+          else
+            git commit -m "claude: ${{ github.event.inputs.prompt }}"
+            git push origin "${{ steps.branch.outputs.name }}"
+            gh pr create \
+              --title "claude: ${{ github.event.inputs.prompt }}" \
+              --body "## 指示\n\n${{ github.event.inputs.prompt }}\n\n---\n*Claude Code により自動生成*" \
+              --head "${{ steps.branch.outputs.name }}"
+          fi
